@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>SRAP — My Donations & Requests</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body class="bg-blue-50 min-h-screen p-8">
+
+<h1 class="text-3xl font-bold text-blue-700 text-center mb-6">My Dashboard</h1>
+
+<!-- Tabs -->
+<div class="mb-6 flex border-b border-gray-300">
+  <button id="tab-donations" class="px-4 py-2 font-semibold border-b-2 border-blue-700">My Donations</button>
+  <button id="tab-requests" class="px-4 py-2 font-semibold text-gray-500 hover:text-blue-700">Manage Requests</button>
+</div>
+
+<!-- Donations Tab -->
+<div id="donationsTab">
+  {% if donations %}
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for d in donations %}
+    <div class="bg-white shadow-lg rounded-2xl p-4 hover:shadow-2xl transition">
+      <img src="{{ url_for('static', filename='uploads/' + (d.image or 'default.jpg')) }}" class="w-full h-44 object-cover rounded-xl mb-3">
+      <h2 class="text-xl font-semibold text-gray-800">{{ d.item_name }}</h2>
+      <p class="text-gray-600 mb-1">Quantity: {{ d.quantity }}</p>
+      <p class="text-gray-600 mb-1">Location: {{ d.collection_location }}</p>
+      <p class="text-gray-500">Status: 
+        <span class="font-semibold {% if d.status=='accepted' %}text-green-600{% elif d.status=='declined' %}text-red-600{% elif d.status=='collected' %}text-gray-500{% else %}text-yellow-600{% endif %}">
+          {{ d.status.capitalize() }}
+        </span>
+      </p>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="text-center text-gray-600 text-lg mt-10">You haven’t donated anything yet.</p>
+  {% endif %}
+</div>
+
+<!-- Requests Tab -->
+<div id="requestsTab" class="hidden">
+  {% if requests %}
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for r in requests %}
+    <div class="bg-white shadow-lg rounded-2xl p-4 hover:shadow-2xl transition" id="request-card-{{ r.id }}">
+      <h3 class="text-lg font-semibold">{{ r.donation.item_name }}</h3>
+      <p><strong>Requester:</strong> {{ r.requester_name }}</p>
+      <p><strong>Email:</strong> {{ r.requester_email }}</p>
+      <p><strong>Area:</strong> {{ r.requester_area or 'N/A' }}</p>
+      <p><strong>Message:</strong> {{ r.message or 'No message' }}</p>
+      <p><strong>Status:</strong> 
+        <span id="status-{{ r.id }}" class="font-semibold {% if r.status=='accepted' %}text-green-600{% elif r.status=='declined' %}text-red-600{% elif r.status=='collected' %}text-gray-500{% else %}text-yellow-600{% endif %}">
+          {{ r.status.capitalize() }}
+        </span>
+      </p>
+      <div class="mt-3 flex gap-2">
+        {% if r.status == 'pending' %}
+        <button onclick="updateRequest({{ r.id }}, 'approve')" class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700">Approve</button>
+        <button onclick="updateRequest({{ r.id }}, 'decline')" class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700">Decline</button>
+        {% elif r.status == 'accepted' %}
+        <button onclick="markCollected({{ r.id }})" class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600">Mark Collected</button>
+        {% else %}
+        <span class="text-gray-500">No action</span>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="text-center text-gray-600 text-lg mt-10">No incoming requests yet.</p>
+  {% endif %}
+</div>
+
+<script>
+// Tabs logic
+const donationsTabBtn = document.getElementById("tab-donations");
+const requestsTabBtn = document.getElementById("tab-requests");
+const donationsTab = document.getElementById("donationsTab");
+const requestsTab = document.getElementById("requestsTab");
+
+donationsTabBtn.addEventListener("click", () => {
+  donationsTab.classList.remove("hidden");
+  requestsTab.classList.add("hidden");
+  donationsTabBtn.classList.add("border-blue-700");
+  requestsTabBtn.classList.remove("border-blue-700");
+});
+
+requestsTabBtn.addEventListener("click", () => {
+  requestsTab.classList.remove("hidden");
+  donationsTab.classList.add("hidden");
+  requestsTabBtn.classList.add("border-blue-700");
+  donationsTabBtn.classList.remove("border-blue-700");
+});
+
+// Approve / Decline requests
+async function updateRequest(requestId, action) {
+  try {
+    const res = await fetch(`/update_request_status/${requestId}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: `action=${action}`
+    });
+    const data = await res.json();
+    if (data.status === "success") {
+      const statusElem = document.getElementById(`status-${requestId}`);
+      statusElem.textContent = action === "approve" ? "Accepted" : "Declined";
+      statusElem.className = `font-semibold ${action==="approve"?"text-green-600":"text-red-600"}`;
+      const card = document.getElementById(`request-card-${requestId}`);
+      card.querySelectorAll('button').forEach(b => b.remove());
+      Swal.fire("Success", data.message, "success");
+    } else {
+      Swal.fire("Error", data.message, "error");
+    }
+  } catch (e) {
+    Swal.fire("Error", "Request failed", "error");
+  }
+}
+
+// Mark collected
+async function markCollected(requestId) {
+  try {
+    const res = await fetch(`/request_collected/${requestId}`, { method: "POST" });
+    const data = await res.json();
+    if (data.status === "success") {
+      const statusElem = document.getElementById(`status-${requestId}`);
+      statusElem.textContent = "Collected";
+      statusElem.className = "font-semibold text-gray-500";
+      const card = document.getElementById(`request-card-${requestId}`);
+      card.querySelectorAll('button').forEach(b => b.remove());
+      Swal.fire("Success", data.message, "success");
+    } else {
+      Swal.fire("Error", data.message, "error");
+    }
+  } catch (e) {
+    Swal.fire("Error", "Request failed", "error");
+  }
+}
+</script>
+
+</body>
+</html>

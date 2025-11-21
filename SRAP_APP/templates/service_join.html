@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Join Service</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<style>
+body.bg {background:#f0f4f8; font-family:Arial,sans-serif; margin:0; padding:0;}
+header {background:#4f46e5; color:white; padding:1rem 2rem; display:flex; justify-content:space-between; align-items:center;}
+header h1 {margin:0; font-size:1.2rem;}
+.container {max-width:600px; margin:2rem auto; background:white; padding:2rem; border-radius:12px; box-shadow:0 2px 6px rgba(0,0,0,0.1);}
+label {font-weight:600; margin-top:0.5rem; display:block;}
+input, textarea {width:100%; padding:0.6rem; margin:0.5rem 0; border:1px solid #ccc; border-radius:6px; font-size:1rem;}
+.btn {background:#38bdf8; color:white; padding:0.8rem 1.2rem; border:none; border-radius:6px; cursor:pointer; font-weight:600; width:100%; margin-top:0.5rem; transition:0.2s;}
+.btn:hover {background:#0ea5e9;}
+.btn-back {display:block; width:fit-content; margin:1rem auto 0 auto; background:#4b5563;}
+.btn-back:hover {background:#374151;}
+@media(max-width:480px){header h1{font-size:1rem;}}
+</style>
+</head>
+<body class="bg">
+
+<header>
+  <h1>🤝 Join Service</h1>
+  <a href="{{ url_for('service_dashboard') }}" class="btn btn-back">⬅ Back</a>
+</header>
+
+<div class="container">
+  <h2>{{ service.name }}</h2>
+  <p><strong>Organization:</strong> {{ service.organization }}</p>
+  <p><strong>Place:</strong> {{ service.place }}</p>
+  <p><strong>Status:</strong> {{ service.status }}</p>
+
+  <form method="POST">
+    <label>Your Name:</label>
+    <input type="text" name="requester_name" value="{{ session.get('username') }}" required>
+
+    <label>Your Email:</label>
+    <input type="email" name="requester_email" value="{{ session.get('email') }}" required>
+
+    <label>Message (optional):</label>
+    <textarea name="message" rows="3" placeholder="Any additional info..."></textarea>
+
+    <button type="submit" class="btn">📩 Send Join Request</button>
+  </form>
+
+  <a href="{{ url_for('service_dashboard') }}" class="btn btn-back">⬅ Back to Dashboard</a>
+</div>
+
+</body>
+</html>

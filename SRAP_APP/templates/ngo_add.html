@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Add New NGO</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<style>
+body.bg {background:#f0f4f8; font-family:Arial,sans-serif; margin:0; padding:0;}
+header {background:#2563eb; color:white; padding:1rem 2rem; display:flex; justify-content:space-between; align-items:center;}
+header h1 {margin:0; font-size:1.2rem;}
+.container {max-width:600px; margin:2rem auto; background:#fff; padding:2rem; border-radius:12px; box-shadow:0 2px 6px rgba(0,0,0,0.1);}
+h2 {text-align:center; color:#1e3a8a; margin-bottom:1.5rem;}
+label {font-weight:600; color:#334155;}
+input, textarea, select {width:100%; padding:0.6rem; margin:0.4rem 0 1rem 0; border:1px solid #ccc; border-radius:6px; font-size:1rem;}
+.btn {display:inline-block; background:#2563eb; color:#fff; border:none; padding:0.8rem 1.2rem; border-radius:6px; cursor:pointer; font-weight:600; transition:0.2s; text-align:center; width:100%;}
+.btn:hover {background:#1e40af;}
+.btn-back {display:block; text-align:center; margin-top:1rem; background:#4b5563; width:100%;}
+.btn-back:hover {background:#374151;}
+@media (max-width:480px){.container{padding:1.5rem;} h2{font-size:1.3rem;}}
+</style>
+</head>
+<body class="bg">
+
+<header>
+  <h1>➕ Add New NGO Support</h1>
+  <a href="{{ url_for('ngo_dashboard') }}" class="btn btn-back">⬅ Back</a>
+</header>
+
+<div class="container">
+  <form method="POST">
+    <label>Organization Name:</label>
+    <input type="text" name="name" required>
+
+    <label>Type:</label>
+    <select name="type">
+      <option value="Non-profitable">Non-profitable</option>
+      <option value="Profitable">Profitable</option>
+    </select>
+
+    <label>Website:</label>
+    <input type="url" name="website" placeholder="https://example.com">
+
+    <label>Contact Info:</label>
+    <input type="text" name="contact" placeholder="Email / Phone">
+
+    <label>Areas to Help:</label>
+    <textarea name="areas" rows="3" placeholder="E.g., Education, Health, Environment"></textarea>
+
+    <button class="btn" type="submit">Submit</button>
+  </form>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SRAP — ChatterHall</title>
+<style>
+body { font-family: Arial; background: #f0f4f8; margin:0; }
+.container { max-width: 700px; margin: 30px auto; background: #fff; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); overflow: hidden; }
+#messages { height: 400px; overflow-y: auto; padding: 20px; border-bottom: 1px solid #ccc; }
+.msg { margin-bottom: 10px; display: flex; flex-direction: column; }
+.msg .bubble { padding: 10px; border-radius: 10px; max-width: 70%; }
+.msg.self .bubble { background: #cce4ff; align-self: flex-end; }
+.msg.other .bubble { background: #e5e5e5; align-self: flex-start; }
+.time { font-size: 0.8em; color: #666; margin-top: 2px; }
+input[type="text"] { width: 80%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
+button { padding: 10px 15px; border: none; background: #3b82f6; color: #fff; border-radius: 5px; cursor: pointer; }
+button:hover { background: #2563eb; }
+.send-box { display: flex; padding: 10px; background: #f9f9f9; }
+</style>
+</head>
+<body>
+<div class="container">
+    <div id="messages"></div>
+    <div class="send-box">
+        <input type="text" id="msgInput" placeholder="Type a message..." onkeydown="if(event.key==='Enter') sendMessage()">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+</div>
+
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js" integrity="sha384-+qR7oxlQb2G28eSU7/oh6LkGdxjJmF8NHwT0w1OGWvHBx4+0Fd9R9f6su0F4k6Sv" crossorigin="anonymous"></script>
+<script>
+const username = "{{ username }}";
+const socket = io();
+
+const messagesDiv = document.getElementById("messages");
+
+socket.emit("join", {});
+
+socket.on("load_messages", (data) => {
+    messagesDiv.innerHTML = "";
+    data.forEach(m => addMessage(m));
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+});
+
+socket.on("receive_message", (data) => {
+    addMessage(data);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+});
+
+function addMessage(m) {
+    const msgDiv = document.createElement("div");
+    msgDiv.classList.add("msg", m.sender === username ? "self" : "other");
+    msgDiv.innerHTML = `<div class="bubble">${m.message}</div><div class="time">${m.sender} • ${m.time}</div>`;
+    messagesDiv.appendChild(msgDiv);
+}
+
+function sendMessage() {
+    const input = document.getElementById("msgInput");
+    const message = input.value.trim();
+    if (!message) return;
+    socket.emit("send_message", { message });
+    input.value = "";
+}
+</script>
+</body>
+</html>

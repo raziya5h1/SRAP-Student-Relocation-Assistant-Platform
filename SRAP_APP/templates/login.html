@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>SRAP • Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="bg">
+
+  <div class="card auth-form">
+    <div class="brand">SRAP</div>
+    <h2 class="title">Welcome Back</h2>
+    <p class="text-center text-gray-500 mb-3">Login securely to continue to your dashboard</p>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="alerts">
+          {% for category, message in messages %}
+            <div class="alert {{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <!-- Step 1: Credentials -->
+    {% if step == "form" %}
+      <form method="POST" class="form">
+        <div class="field">
+          <label for="email">Mail ID</label>
+          <input type="email" id="email" name="email" placeholder="you@college.edu" required>
+        </div>
+
+        <div class="field password-field">
+          <label for="loginPwd">Password</label>
+          <div style="position: relative;">
+            <input id="loginPwd" type="password" name="password" placeholder="••••••••" required>
+            <button class="toggle" type="button" onclick="togglePwd('loginPwd', this)">Show</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="college">College</label>
+          <input type="text" id="college" name="college" placeholder="College name" required>
+        </div>
+
+        <div class="grid-2 mt-3">
+          <button class="btn" type="submit">Send OTP</button>
+          <a href="{{ url_for('forgot') }}" class="btn warning" style="text-align:center;">Forgot?</a>
+        </div>
+      </form>
+
+      <div class="bottom-text mt-3">
+        <span>New to SRAP?</span>
+        <a href="{{ url_for('signup') }}" class="text-link">Create an account</a>
+      </div>
+
+    <!-- Step 2: OTP Verification -->
+    {% elif step == "otp" %}
+      <form action="{{ url_for('verify_login') }}" method="POST" class="form">
+        <div class="field">
+          <label>OTP sent to <strong>{{ email }}</strong></label>
+          <input type="text" name="otp" inputmode="numeric" pattern="[0-9]*" placeholder="Enter 6-digit OTP" required>
+        </div>
+
+        <button class="btn success mt-2" type="submit">Verify & Login</button>
+      </form>
+      <div class="bottom-text mt-3">
+        <a href="{{ url_for('login') }}" class="text-link">← Back</a>
+      </div>
+    {% endif %}
+  </div>
+
+  <footer class="bottom-text">© 2025 SRAP • Student Relocation Assistant Platform</footer>
+
+  <script>
+    function togglePwd(id, btn) {
+      const input = document.getElementById(id);
+      if (!input) return;
+      if (input.type === 'password') {
+        input.type = 'text';
+        btn.textContent = 'Hide';
+      } else {
+        input.type = 'password';
+        btn.textContent = 'Show';
+      }
+    }
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manage NGO Requests</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<style>
+body.bg {background:#f0f4f8; font-family:Arial,sans-serif; margin:0; padding:0;}
+header {background:#2563eb; color:white; padding:1rem 2rem; display:flex; justify-content:space-between; align-items:center;}
+header h1 {margin:0; font-size:1.2rem;}
+.container {max-width:700px; margin:2rem auto; background:white; padding:2rem; border-radius:12px; box-shadow:0 2px 6px rgba(0,0,0,0.1);}
+h2 {text-align:center; color:#1e3a8a; margin-bottom:1rem;}
+table {width:100%; border-collapse:collapse;}
+th, td {padding:0.6rem; border-bottom:1px solid #e5e7eb; text-align:center;}
+th {background:#2563eb; color:white;}
+tr:hover {background:#f1f5f9;}
+.btn {background:#38bdf8; color:white; padding:0.4rem 0.8rem; border-radius:6px; border:none; cursor:pointer; font-weight:600; margin:2px; transition:0.2s;}
+.btn:hover {background:#0ea5e9;}
+.btn-back {display:block; width:fit-content; margin:1rem auto; background:#4b5563;}
+.btn-back:hover {background:#374151;}
+@media(max-width:480px){header h1{font-size:1rem;} table, th, td{font-size:0.9rem;}}
+</style>
+</head>
+<body class="bg">
+
+<header>
+  <h1>📋 Manage My NGO Requests</h1>
+  <a href="{{ url_for('ngo_dashboard') }}" class="btn btn-back">⬅ Back</a>
+</header>
+
+<div class="container">
+  <h2>Requests</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Phone</th>
+        <th>Support For</th>
+        <th>Status</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in requests %}
+      <tr>
+        <td>{{ r.user_name }}</td>
+        <td>{{ r.email }}</td>
+        <td>{{ r.phone }}</td>
+        <td>{{ r.support_for }}</td>
+        <td>{{ r.status }}</td>
+        <td>
+          {% if r.status == 'Pending' %}
+          <form method="POST" action="{{ url_for('ngo_mark_helped', req_id=r.id) }}" style="display:inline;">
+            <button type="submit" class="btn">✅ Mark Helped</button>
+          </form>
+          <form method="POST" action="{{ url_for('ngo_delete_request', req_id=r.id) }}" style="display:inline;">
+            <button type="submit" class="btn">❌ Delete</button>
+          </form>
+          {% else %}
+          <span>—</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SRAP — Document Summary</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <style>
+    body {
+      background: linear-gradient(to right, #eef2ff, #f9fafb);
+      font-family: "Poppins", sans-serif;
+    }
+    .doc-card {
+      background: white;
+      border-radius: 1rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+      padding: 1.5rem;
+      transition: all 0.3s ease;
+    }
+    .doc-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+    }
+    .file-preview {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+    .file-item {
+      background: #f3f4f6;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+  </style>
+</head>
+
+<body class="min-h-screen p-6">
+  <div class="max-w-6xl mx-auto">
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-3xl font-bold text-indigo-600">📜 Document Summary</h1>
+      <a href="/doc_helper" class="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-md">Back to Home</a>
+    </div>
+
+    {% if docs %}
+      <div class="grid md:grid-cols-2 gap-6">
+        {% for doc in docs %}
+        <div class="doc-card" data-user-email="{{ doc.email }}">
+          <h2 class="text-xl font-semibold text-gray-800 mb-2">{{ doc.process }}</h2>
+
+          <p><strong>Location:</strong> {{ doc.location }}</p>
+          <p><strong>College:</strong> {{ doc.college }}</p>
+          <p><strong>Name:</strong> {{ doc.name }}</p>
+          <p><strong>Branch:</strong> {{ doc.branch }}</p>
+          <p><strong>Year:</strong> {{ doc.year }}</p>
+          <p><strong>Roll No:</strong> {{ doc.roll }}</p>
+          <p class="mb-2"><strong>Date Submitted:</strong> {{ doc.submitted_on }}</p>
+
+          <div class="file-preview">
+            {% for f in doc.files %}
+              <div class="file-item">
+                📄 <a href="{{ url_for('uploaded_file', user_email=doc.email, filename=f.stored) }}" target="_blank" class="text-indigo-600 hover:underline">{{ f.display }}</a>
+                <span class="text-gray-500 text-xs">({{ f.uploaded_at }})</span>
+              </div>
+            {% endfor %}
+          </div>
+
+          <!-- Upload Form for this doc -->
+          <form class="uploadForm mt-4" action="/doc_helper" method="POST" enctype="multipart/form-data">
+            <input type="file" name="documents" multiple class="border p-1 rounded">
+            <button type="submit" class="bg-indigo-500 text-white px-3 py-1 rounded ml-2">Upload</button>
+          </form>
+
+          <div class="mt-4 text-right">
+            <span class="text-sm text-green-600 font-medium">✅ Request Sent to Admin</span>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="bg-white rounded-lg p-6 text-center shadow-md">
+        <p class="text-gray-600 mb-4">No documents have been submitted yet.</p>
+        <a href="/doc_helper" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">Upload Now</a>
+      </div>
+    {% endif %}
+  </div>
+
+  <script>
+    // Dynamically add file to preview
+    function addFileToPreview(file, container, userEmail) {
+      const div = document.createElement('div');
+      div.className = 'file-item';
+      div.innerHTML = `
+        📄 <a href="/uploads/${userEmail}/${file.stored}" target="_blank" class="text-indigo-600 hover:underline">${file.display}</a>
+        <span class="text-gray-500 text-xs">(${file.uploaded_at})</span>
+      `;
+      container.appendChild(div);
+    }
+
+    // Attach AJAX upload handler to each upload form
+    document.querySelectorAll('.uploadForm').forEach(form => {
+      form.addEventListener('submit', async e => {
+        e.preventDefault();
+        const formData = new FormData(form);
+        const docCard = form.closest('.doc-card');
+        const previewContainer = docCard.querySelector('.file-preview');
+        const userEmail = docCard.dataset.userEmail;
+
+        try {
+          const response = await fetch(form.action, {
+            method: 'POST',
+            body: formData
+          });
+          const result = await response.json();
+          if (result.status === 'success') {
+            result.files.forEach(file => addFileToPreview(file, previewContainer, userEmail));
+            Swal.fire('Success', 'Files uploaded successfully!', 'success');
+          } else {
+            Swal.fire('Error', result.message || 'Upload failed', 'error');
+          }
+        } catch (err) {
+          console.error(err);
+          Swal.fire('Error', 'Something went wrong', 'error');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

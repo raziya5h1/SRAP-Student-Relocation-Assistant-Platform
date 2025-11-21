@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>SRAP • Forgot Password (Step 3)</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="bg">
+  <div class="card">
+    <h2>Verify College</h2>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="alerts">
+          {% for category, message in messages %}
+            <div class="alert {{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST">
+      <div class="field">
+        <label>College Name</label>
+        <input type="text" name="college" placeholder="Enter your college name" required>
+      </div>
+      <button class="btn primary" type="submit">Next</button>
+    </form>
+  </div>
+</body>
+</html>

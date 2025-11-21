@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>SRAP — Manage Requests</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body class="bg-blue-50 min-h-screen p-8">
+
+<h1 class="text-3xl font-bold text-blue-700 text-center mb-8">Manage Incoming Requests</h1>
+
+{% if requests %}
+<div class="overflow-x-auto">
+  <table class="min-w-full bg-white border rounded-xl shadow-lg">
+    <thead class="bg-blue-600 text-white">
+      <tr>
+        <th class="py-3 px-4">Item</th>
+        <th class="py-3 px-4">Requester</th>
+        <th class="py-3 px-4">Email</th>
+        <th class="py-3 px-4">Area</th>
+        <th class="py-3 px-4">Message</th>
+        <th class="py-3 px-4">Requested At</th>
+        <th class="py-3 px-4">Status</th>
+        <th class="py-3 px-4">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for req in requests %}
+      <tr class="border-t hover:bg-blue-50">
+        <td class="py-2 px-4">{{ req.donation.item_name }}</td>
+        <td class="py-2 px-4">{{ req.requester_name }}</td>
+        <td class="py-2 px-4">{{ req.requester_email }}</td>
+        <td class="py-2 px-4">{{ req.requester_area }}</td>
+        <td class="py-2 px-4">{{ req.message or '—' }}</td>
+        <td class="py-2 px-4">{{ req.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+        <td class="py-2 px-4 font-semibold text-center" id="status-{{ req.id }}">{{ req.status.capitalize() }}</td>
+        <td class="py-2 px-4 text-center">
+          {% if req.status == 'pending' %}
+            <button onclick="updateStatus({{ req.id }}, 'approve')" class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700">Approve</button>
+            <button onclick="updateStatus({{ req.id }}, 'decline')" class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700">Decline</button>
+          {% else %}
+            <span class="text-gray-500">No action</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<p class="text-center text-gray-600 text-lg mt-10">No incoming requests yet.</p>
+{% endif %}
+
+<script>
+function updateStatus(id, action) {
+  fetch(`/update_request_status/${id}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: `action=${action}`
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.status === "success") {
+      document.getElementById(`status-${id}`).innerText = action === "approve" ? "Accepted" : "Declined";
+      Swal.fire("Updated!", data.message, "success");
+    } else {
+      Swal.fire("Error", data.message, "error");
+    }
+  })
+  .catch(() => Swal.fire("Error", "Failed to update request", "error"));
+}
+</script>
+
+</body>
+</html>

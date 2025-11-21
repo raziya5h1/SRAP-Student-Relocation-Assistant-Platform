@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SRAP — Local Assistant</title>
+
+<!-- Mapbox CSS & Directions Plugin -->
+<link href='https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.css' rel='stylesheet' />
+<link href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.0/mapbox-gl-directions.css' rel='stylesheet' />
+
+<style>
+  body { margin: 0; font-family: Arial, sans-serif; }
+
+  /* Floating Header */
+  header {
+    background: rgba(37, 99, 235, 0.9);
+    color: white;
+    padding: 1rem;
+    text-align: center;
+    font-size: 1.2rem;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    left: 0;
+    z-index: 999;
+    backdrop-filter: blur(5px);
+    transition: top 0.3s ease, padding 0.3s ease, font-size 0.3s ease;
+  }
+
+  /* Map container */
+  .map-container {
+    position: relative;
+    top: 60px; /* initial header height */
+    height: calc(100vh - 60px);
+  }
+
+  #map {
+    height: 100%;
+    width: 100%;
+  }
+</style>
+</head>
+<body>
+
+<header id="header">Local Assistant 🌍</header>
+
+<div class="map-container">
+  <div id='map'></div>
+</div>
+
+<!-- Mapbox JS & Directions Plugin -->
+<script src='https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.js'></script>
+<script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.0/mapbox-gl-directions.js"></script>
+
+<!-- Custom Script -->
+<script src="{{ url_for('static', filename='google_map_clone/script.js') }}" defer></script>
+
+<!-- Auto-hide Header Script -->
+<script>
+let lastScrollTop = 0;
+const header = document.getElementById('header');
+
+window.addEventListener('scroll', function() {
+    let st = window.pageYOffset || document.documentElement.scrollTop;
+    if (st > lastScrollTop && st > 50){ 
+        // scrolling down
+        header.style.top = '-60px'; // hide
+    } else { 
+        // scrolling up
+        header.style.top = '0';
+    }
+    lastScrollTop = st <= 0 ? 0 : st;
+});
+</script>
+
+</body>
+</html>

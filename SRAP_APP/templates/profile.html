@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Profile | SRAP</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    body.light { background-color: #f7f9fc; color: #0b1630; }
+    body.dark { background-color: #1e1e2f; color: #f1f1f1; }
+
+    .profile-card {
+      max-width: 600px;
+      margin: 60px auto;
+      padding: 30px;
+      border-radius: 18px;
+      background-color: inherit;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    }
+    .profile-pic {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      display: block;
+      margin: 0 auto 10px;
+    }
+    label { display: block; margin-top: 12px; font-weight: 600; }
+    input, textarea {
+      width: 100%; padding: 8px; margin-top: 4px;
+      border-radius: 8px; border: 1px solid #ccc;
+    }
+    input[readonly] { background-color: #e9e9e9; color: #555; cursor: not-allowed; }
+    textarea { resize: vertical; }
+    .btn {
+      display: block; width: 100%; padding: 12px; margin-top: 20px;
+      border: none; border-radius: 12px; cursor: pointer; font-weight: 700;
+      background-color: #0078d7; color: #fff;
+    }
+    .btn:hover { background-color: #005bb5; }
+    .dark-light-toggle {
+      position: fixed; top: 10px; right: 10px;
+      cursor: pointer; padding: 8px 12px;
+      border-radius: 12px; border: 1px solid #ccc;
+      background-color: #fff; font-weight: 600;
+    }
+  </style>
+</head>
+<body class="light">
+  <div class="dark-light-toggle" onclick="toggleDarkLight()">Switch Theme</div>
+
+  <div class="profile-card">
+    <h2 style="text-align:center;">Your Profile</h2>
+
+    <form method="POST" enctype="multipart/form-data">
+      <div style="text-align:center;">
+        {% if user.profile_pic %}
+          <img id="profilePreview" 
+               src="{{ url_for('static', filename='uploads/profile_pics/' + user.profile_pic) }}?{{ user.profile_pic_timestamp or '' }}" 
+               alt="Profile Picture" class="profile-pic">
+        {% else %}
+          <img id="profilePreview" src="{{ url_for('static', filename='default_profile.png') }}" alt="Profile Picture" class="profile-pic">
+        {% endif %}
+        <input type="file" name="profile_pic" id="profile_pic" accept="image/*" style="margin-top:5px;">
+      </div>
+
+      <label>Name</label>
+      <input type="text" name="name" value="{{ user.name }}" required>
+
+      <label>Email (Read-only)</label>
+      <input type="email" value="{{ user.email }}" readonly>
+
+      <label>Password (Read-only)</label>
+      <input type="password" value="********" readonly>
+
+      <label>College (Read-only)</label>
+      <input type="text" value="{{ user.college }}" readonly>
+
+      <label>Phone</label>
+      <input type="text" name="phone" value="{{ user.phone }}">
+
+      <label>Branch</label>
+      <input type="text" name="branch" value="{{ user.branch }}">
+
+      <label>Semester</label>
+      <input type="text" name="semester" value="{{ user.sem }}">
+
+      <label>Roll Number</label>
+      <input type="text" name="roll" value="{{ user.roll }}">
+
+      <button type="submit" class="btn">Save Changes</button>
+    </form>
+  </div>
+
+  <script>
+    // Live preview for uploaded image
+    const profileInput = document.getElementById("profile_pic");
+    const previewImg = document.getElementById("profilePreview");
+    profileInput.addEventListener("change", function() {
+      const file = this.files[0];
+      if(file){
+        const reader = new FileReader();
+        reader.onload = e => previewImg.src = e.target.result;
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Dark/Light toggle with memory
+    function toggleDarkLight() {
+      const body = document.body;
+      body.classList.toggle("dark");
+      body.classList.toggle("light");
+      localStorage.setItem("theme", body.classList.contains("dark") ? "dark" : "light");
+    }
+
+    // Apply saved theme on load
+    window.addEventListener("DOMContentLoaded", () => {
+      const savedTheme = localStorage.getItem("theme") || "light";
+      document.body.classList.add(savedTheme);
+      document.body.classList.remove(savedTheme === "dark" ? "light" : "dark");
+    });
+  </script>
+</body>
+</html>

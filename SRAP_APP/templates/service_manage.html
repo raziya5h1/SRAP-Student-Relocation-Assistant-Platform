@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Service Requests</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background-color: #f9f9f9; }
+    h1 { color: #007BFF; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; background-color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    th, td { padding: 12px; border: 1px solid #ddd; text-align: left; }
+    th { background-color: #007BFF; color: white; }
+    tr:nth-child(even) { background-color: #f2f2f2; }
+    .btn { padding: 6px 12px; border-radius: 5px; color: white; border: none; cursor: pointer; font-weight: bold; }
+    .btn-success { background-color: #28a745; }
+    .btn-danger { background-color: #dc3545; }
+    .btn[disabled] { opacity: 0.6; cursor: not-allowed; }
+    .badge { padding: 4px 8px; border-radius: 5px; color: white; font-weight: bold; }
+    .badge-Pending { background-color: #ffc107; }
+    .badge-Accepted { background-color: #28a745; }
+    .badge-Declined { background-color: #dc3545; }
+  </style>
+</head>
+<body>
+  <h1>Manage Requests for "{{ service.name }}"</h1>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Requestor Name</th>
+        <th>Requestor Email</th>
+        <th>Message</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for req in requests %}
+      <tr id="row-{{ req.id }}">
+        <td>{{ req.requester_name }}</td>
+        <td>{{ req.requester_email }}</td>
+        <td>{{ req.message }}</td>
+        <td id="status-{{ req.id }}">
+          <span class="badge badge-{{ req.status }}">{{ req.status }}</span>
+        </td>
+        <td>
+          {% if req.status == 'Pending' %}
+            <button class="btn btn-success" onclick="updateRequest({{ req.id }}, 'accept')">Accept</button>
+            <button class="btn btn-danger" onclick="updateRequest({{ req.id }}, 'decline')">Decline</button>
+          {% else %}
+            <em>No actions available</em>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <script>
+    function updateRequest(rid, action) {
+      fetch("{{ url_for('service_request_action_ajax') }}", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rid: rid, action: action })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if(data.status === "success") {
+          document.getElementById(`status-${rid}`).innerHTML = `<span class="badge badge-${data.new_status}">${data.new_status}</span>`;
+          let row = document.getElementById(`row-${rid}`);
+          row.querySelectorAll("button").forEach(btn => btn.disabled = true);
+        } else {
+          alert(data.message || "Error occurred");
+        }
+      })
+      .catch(err => alert("Request failed"));
+    }
+  </script>
+</body>
+</html>

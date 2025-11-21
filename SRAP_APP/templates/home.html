@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SRAP • Home</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body class="bg">
+
+<!-- ===== TOPBAR ===== -->
+<header class="topbar">
+  <div class="top-left">
+    <div class="brand">SRAP</div>
+  </div>
+  
+  <div class="top-center">
+    <div class="marquee-wrapper">
+      <div class="marquee-text">
+        Student Relocation Assistance Platform - All-in-one Support System
+      </div>
+    </div>
+  </div>
+
+  <div class="top-right">
+    <a class="pill" href="{{ url_for('logout') }}">Logout</a>
+  </div>
+</header>
+
+
+
+
+<!-- ===== WELCOME CARD ===== -->
+<div class="welcome-card">
+  <h1>Welcome, <span>{{ username }}</span> 🎉</h1>
+  <p class="subtitle">Your one-stop student support dashboard</p>
+</div>
+
+<!-- ===== DASHBOARD GRID ===== -->
+<div class="dashboard-grid">
+  <a class="dash-card" href="{{ url_for('doc_helper') }}">
+    <div class="icon">📄</div>
+    <div class="label">Doc Helper</div>
+  </a>
+  <button class="dash-card" id="donationBtn">
+    <div class="icon">🎁</div>
+    <div class="label">Donation</div>
+  </button>
+  <a class="dash-card" href="{{ url_for('local_assistant') }}">
+    <div class="icon">🤖</div>
+    <div class="label">Local Assistant</div>
+  </a>
+  <a class="dash-card" href="{{ url_for('chatterhall') }}">
+    <div class="icon">💬</div>
+    <div class="label">Chatter Hall</div>
+  </a>
+  <button class="dash-card" id="ngoServiceBtn">
+    <div class="icon">🏛</div>
+    <div class="label">NGO / Service</div>
+  </button>
+  <a class="dash-card" href="{{ url_for('profile') }}">
+    <div class="icon">👤</div>
+    <div class="label">Profile</div>
+  </a>
+</div>
+
+<!-- ===== DONATION MODAL ===== -->
+<div id="donationModal" class="modal">
+  <div class="modal-content">
+    <span class="close-btn" id="closeModalDonation">&times;</span>
+    <div class="tab-header">
+      <button class="tab-btn active" data-tab="donorTab">Donor</button>
+      <button class="tab-btn" data-tab="receiverTab">Receiver</button>
+    </div>
+    <div id="donorTab" class="tab-content">
+      <button class="modal-btn btn-donor" onclick="location.href='{{ url_for('donate') }}'">
+        🤝 I'm a Donor
+      </button>
+    </div>
+    <div id="receiverTab" class="tab-content hidden">
+      <input type="text" id="search_item" class="search-input" placeholder="Search by Item name">
+      <input type="text" id="search_area" class="search-input" placeholder="Search by Area">
+      <button class="modal-btn btn-receiver" type="button" onclick="searchDonations()">🔍 Search Donations</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== NGO / SERVICE MODAL ===== -->
+<div id="ngoServiceModal" class="modal">
+  <div class="modal-content">
+    <span class="close-btn" id="closeModalNGO">&times;</span>
+    <h3>NGO Options</h3>
+    <div class="modal-grid">
+      <div class="modal-card" onclick="location.href='{{ url_for('add_ngo') }}'">
+        <h4>➕ Add NGO</h4>
+        <p>Create a new NGO entry</p>
+      </div>
+      <div class="modal-card" onclick="location.href='{{ url_for('ngo_manage_request') }}'">
+        <h4>📋 Manage NGO Requests</h4>
+        <p>View or update requests</p>
+      </div>
+      <div class="modal-card" onclick="location.href='{{ url_for('ngo_dashboard') }}'">
+        <h4>🏛 View NGOs</h4>
+        <p>See all registered NGOs</p>
+      </div>
+    </div>
+    <h3 style="margin-top:1rem;">Service Options</h3>
+    <div class="modal-grid">
+      <div class="modal-card" onclick="location.href='{{ url_for('create_service') }}'">
+        <h4>➕ Create Service</h4>
+        <p>Add a new service</p>
+      </div>
+      <div class="modal-card" onclick="location.href='{{ url_for('my_services') }}'">
+        <h4>📌 My Services</h4>
+        <p>See your services</p>
+      </div>
+      <div class="modal-card" onclick="location.href='{{ url_for('service_dashboard') }}'">
+        <h4>🛠 View Services</h4>
+        <p>All services dashboard</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SCRIPTS ===== -->
+<script>
+// Modal functionality
+const donationModal = document.getElementById('donationModal');
+const openDonationBtn = document.getElementById('donationBtn');
+const closeDonationBtn = document.getElementById('closeModalDonation');
+
+openDonationBtn.onclick = () => donationModal.style.display = 'flex';
+closeDonationBtn.onclick = () => donationModal.style.display = 'none';
+
+const ngoModal = document.getElementById('ngoServiceModal');
+const ngoServiceBtn = document.getElementById('ngoServiceBtn');
+const closeNgoModal = document.getElementById('closeModalNGO');
+
+ngoServiceBtn.onclick = () => ngoModal.style.display = 'flex';
+closeNgoModal.onclick = () => ngoModal.style.display = 'none';
+
+// Close modals on outside click
+window.onclick = e => {
+  if(e.target === donationModal) donationModal.style.display = 'none';
+  if(e.target === ngoModal) ngoModal.style.display = 'none';
+};
+
+// Tab functionality in donation modal
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const parent = btn.closest('.modal-content');
+    parent.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    parent.querySelectorAll('.tab-content').forEach(tc => tc.classList.add('hidden'));
+    document.getElementById(btn.dataset.tab).classList.remove('hidden');
+  });
+});
+
+// Donation search
+function searchDonations(){
+  const item = document.getElementById('search_item').value.trim();
+  const area = document.getElementById('search_area').value.trim();
+  let url = "{{ url_for('donations_home') }}";
+  const params = [];
+  if(item) params.push("item=" + encodeURIComponent(item));
+  if(area) params.push("area=" + encodeURIComponent(area));
+  if(params.length) url += "?" + params.join("&");
+  window.location.href = url;
+}
+</script>
+
+</body>
+</html>

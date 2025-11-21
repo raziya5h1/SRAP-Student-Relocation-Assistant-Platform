@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>NGO Dashboard</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<style>
+body.bg {background:#f0f4f8; font-family: Arial,sans-serif; margin:0; padding:0;}
+header {background:#2563eb; color:white; padding:1rem 2rem; display:flex; justify-content:space-between; align-items:center;}
+header h1 {margin:0; font-size:1.2rem;}
+.container {max-width:1000px; margin:2rem auto; text-align:center;}
+.grid {display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:1rem;}
+.card {background:#38bdf8; color:white; border-radius:12px; padding:1rem; transition: transform 0.2s, box-shadow 0.2s;}
+.card:hover {transform: translateY(-4px); box-shadow:0 6px 12px rgba(0,0,0,0.15);}
+.card a {color:white; text-decoration:none;}
+.btn {display:inline-block; background:#2563eb; color:#fff; padding:0.6rem 1rem; border-radius:6px; text-decoration:none; margin:0.3rem; transition:0.2s;}
+.btn:hover {background:#1d4ed8;}
+</style>
+</head>
+<body class="bg">
+
+<header>
+  <h1>🏛 NGO Dashboard</h1>
+  <a href="{{ url_for('home') }}" class="btn">🏠 Home</a>
+</header>
+
+<div class="container">
+  <h2>Registered NGOs</h2>
+  <div class="grid">
+    {% for n in ngos %}
+    <div class="card">
+      <h3>{{ n.name }}</h3>
+      <p>Type: {{ n.type }}</p>
+      <p>Areas: {{ n.areas }}</p>
+      <a href="{{ n.website }}" target="_blank">🌐 Website</a><br><br>
+      <a href="{{ url_for('ngo_request_help', ngo_id=n.id) }}" class="btn">🤝 Request Help</a>
+    </div>
+    {% endfor %}
+  </div>
+  <br>
+  <a href="{{ url_for('add_ngo') }}" class="btn">➕ Add New NGO</a>
+  <a href="{{ url_for('ngo_manage_request') }}" class="btn">📋 Manage My NGO Requests</a>
+</div>
+
+</body>
+</html>
