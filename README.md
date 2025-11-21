@@ -144,14 +144,29 @@ Then open:
 ---
 
 🗂 Folder Structure
+```bash
 SRAP/
  ┣ app.py
  ┣ .env
  ┣ requirements.txt
  ┣ README.md
  ┣ /static
+      ┣ Style.css
+      ┣ /uploads
+         ┣ .png,.jpge,.gif,.pdf.....
  ┣ /templates
- ┣ /uploads
+       ┣ login.html
+       ┣ signup.html
+       ┣ /forget_password.html
+       ┣ home.html
+       ┣ /doc_module.html
+       ┣ /donation.html
+       ┣ /Chatter_hall.html
+       ┣ Assistant.html
+       ┣ /NGO_SERVICE.html
+       ┣ profile.html
+┣ /multi_chat_room
+```
 
  ---
 🔐 Security Features
@@ -198,4 +213,5 @@ Note: An multiroom module is also included for group chat between colleges
 ```bash
 git clone https://github.com/<your-username>/SRAP.git
 cd SRAP
-pip install -r requirements.txt ```
+pip install -r requirements.txt
+```
